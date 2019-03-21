@@ -4,10 +4,15 @@ import os
 from PIL import Image
 import numpy as np
 from keras.preprocessing.image import img_to_array, load_img
+
+
+# Dowenloding the images from google
 def Dowenloading_Data(kewword,NumOfphoto) :
     response = google_images_download.googleimagesdownload()
     absolute_image_paths = response.download({"keywords":kewword , "limit" : NumOfphoto , "color_type" : "full-color" , "aspect_ratio": "square" ,"chromedriver":"/home/ziad/Downloads/chromedriver"})
 
+
+# converting all image to the same size
 def resizeing(path,newepath,newWidth,newHight) :
     faild = 0
     for ind,image_path in enumerate(os.listdir(path)):
@@ -23,9 +28,11 @@ def resizeing(path,newepath,newWidth,newHight) :
     print(faild)
 
 
+
+
 def Read_Data() :
 
-    # Load the Dataset from the file data and return it as three part (training, validation, testing) sets.
+    # Load the Dataset from the file data and return it .
 
     folder = 'Dataset'
 
@@ -45,14 +52,13 @@ def Read_Data() :
         img = load_img(folder + "/" + _file)  # this is a PIL image
         img.thumbnail((image_width, image_height))
 
-        #conver to Black & white
+        #converting to Black & white
         x = img.convert('1')
+
         # Convert to Numpy Array
         x = img_to_array(x)
         y = img_to_array(img)
-        # x = x.reshape((3, 120, 160))
-        # Normalize
-        # x = (x - 128.0) / 128.0
+
         datasetInput[i] = x
         datasetOutput[i] = y
         i += 1
@@ -62,11 +68,19 @@ def Read_Data() :
 
     return datasetInput , datasetOutput
 
+
 def get_Data(num_training=3500, num_validation=500, num_test=500 ):
+
+    #spilting the dato into three categry (training, validation, testing) .
+
+    # read the data from the file and convert it into numpy array
     datasetInput, datasetOutput = Read_Data()
+
+
     TrainingMask = list(range(0, num_training))
     ValidationMask = list(range(num_training , num_training+num_validation))
     TestMask = list(range( num_training+num_validation ,  num_training + num_validation + num_test))
+
 
     X_train = datasetInput[TrainingMask]
     y_train = datasetOutput[TrainingMask]
@@ -84,4 +98,3 @@ def get_Data(num_training=3500, num_validation=500, num_test=500 ):
     }
 
 
-get_Data()
