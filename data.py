@@ -69,7 +69,7 @@ def Read_Data() :
     return datasetInput , datasetOutput
 
 
-def get_Data(num_training=3500, num_validation=500, num_test=500 ):
+def get_Data(num_training=3500, num_validation=500, num_test=500 ,norm = True):
 
     #spilting the dato into three categry (training, validation, testing) .
 
@@ -90,6 +90,13 @@ def get_Data(num_training=3500, num_validation=500, num_test=500 ):
 
     X_test = datasetInput[TestMask]
     y_test = datasetOutput[TestMask]
+
+    # normalizing the image
+    if(norm) :
+        mean = np.mean(X_train , axis = 0 )
+        X_train -= mean
+        X_val -= mean
+        X_test -= mean
 
     return {
         'X_train' : X_train, 'y_train' : y_train,
