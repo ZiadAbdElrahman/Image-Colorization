@@ -34,7 +34,7 @@ def Read_Data() :
 
     # Load the Dataset from the file data and return it .
 
-    folder = 'Dataset'
+    folder = 'Datasetsub'
 
     images = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
     print("Files in train_files: %d" % len(images))
@@ -44,29 +44,35 @@ def Read_Data() :
     image_height = 224
     channels = 3
 
-    datasetInput = np.ndarray(shape=(len(images), image_height, image_width, channels),dtype=np.float32)
+    datasetInput = np.ndarray(shape=(len(images), image_height, image_width, 1),dtype=np.float32)
     datasetOutput = np.ndarray(shape=(len(images), image_height, image_width, channels), dtype=np.float32)
 
+    # datasetInput = []
+    # datasetOutput = []
     i = 0
     for _file in images:
         img = load_img(folder + "/" + _file)  # this is a PIL image
         img.thumbnail((image_width, image_height))
 
+
         #converting to Black & white
-        x = img.convert('1')
+        x = img.convert('L')
+
+
 
         # Convert to Numpy Array
-        x = img_to_array(x)
-        y = img_to_array(img)
+        x = np.asarray(x)
+        y = np.asarray(img)
 
-        datasetInput[i] = x
+        datasetInput[i, ..., 0] = x
         datasetOutput[i] = y
+
         i += 1
         if i % 1000 == 0:
             print("%d images to array" % i)
     print("All images to array!")
 
-    return datasetInput , datasetOutput
+    return datasetInput, datasetOutput
 
 
 def get_Data(num_training=3500, num_validation=500, num_test=500 ,norm = True):
@@ -103,5 +109,4 @@ def get_Data(num_training=3500, num_validation=500, num_test=500 ,norm = True):
         'X_val' :X_val , 'y_val' : y_val,
         'X_test' : X_test, 'y_test' : y_test
     }
-
 
