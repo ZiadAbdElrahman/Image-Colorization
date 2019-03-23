@@ -58,7 +58,8 @@ def Read_Data() :
         #converting to Black & white
         x = img.convert('L')
 
-
+        # img = Image.fromarray(x, 'RGB')
+        img.save('/home/ziad/Documents/image colorization/data_set/y_train/' + str(i) + 'my.png')
 
         # Convert to Numpy Array
         x = np.asarray(x)
@@ -66,6 +67,8 @@ def Read_Data() :
 
         datasetInput[i, ..., 0] = x
         datasetOutput[i] = y
+        if(i==200) :
+            break
 
         i += 1
         if i % 1000 == 0:
@@ -88,6 +91,7 @@ def get_Data(num_training=3500, num_validation=500, num_test=500 ,norm = True):
     TestMask = list(range( num_training+num_validation ,  num_training + num_validation + num_test))
 
 
+
     X_train = datasetInput[TrainingMask]
     y_train = datasetOutput[TrainingMask]
 
@@ -99,14 +103,27 @@ def get_Data(num_training=3500, num_validation=500, num_test=500 ,norm = True):
 
     # normalizing the image
     if(norm) :
-        mean = np.mean(X_train , axis = 0 )
-        X_train -= mean
-        X_val -= mean
-        X_test -= mean
+        meanX = np.mean(X_train , axis = 0 )
+        meany = np.mean(y_train ,axis=0)
+        X_train -= meanX
+        X_val -= meanX
+        X_test -= meanX
 
-    return {
-        'X_train' : X_train, 'y_train' : y_train,
-        'X_val' :X_val , 'y_val' : y_val,
-        'X_test' : X_test, 'y_test' : y_test
-    }
+        y_train -= meany
+        y_test -= meany
+        y_val -= meany
+
+
+        return {
+            'X_train': X_train, 'y_train': y_train,
+            'X_val':X_val , 'y_val': y_val,
+            'X_test': X_test, 'y_test': y_test,
+            'meanX': meanX, 'meany': meany
+        }
+    else :
+        return {
+            'X_train': X_train, 'y_train': y_train,
+            'X_val': X_val, 'y_val': y_val,
+            'X_test': X_test, 'y_test': y_test
+        }
 
