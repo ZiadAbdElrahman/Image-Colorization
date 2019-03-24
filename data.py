@@ -4,7 +4,8 @@ import os
 from PIL import Image
 import numpy as np
 from keras.preprocessing.image import img_to_array, load_img
-
+from skimage.color import rgb2lab
+from skimage import io, color
 
 # Dowenloding the images from google
 def Dowenloading_Data(kewword,NumOfphoto) :
@@ -34,7 +35,7 @@ def Read_Data() :
 
     # Load the Dataset from the file data and return it .
 
-    folder = 'Datasetsub'
+    folder = 'Dataset'
 
     images = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
     print("Files in train_files: %d" % len(images))
@@ -45,25 +46,30 @@ def Read_Data() :
     channels = 3
 
     datasetInput = np.ndarray(shape=(len(images), image_height, image_width, 1),dtype=np.float32)
-    datasetOutput = np.ndarray(shape=(len(images), image_height, image_width, channels), dtype=np.float32)
+    datasetOutput = np.ndarray(shape=(len(images), image_height, image_width, 2), dtype=np.float32)
 
     # datasetInput = []
     # datasetOutput = []
     i = 0
     for _file in images:
         img = load_img(folder + "/" + _file)  # this is a PIL image
-        img.thumbnail((image_width, image_height))
-
+        # img.thumbnail((image_width, image_height))
+        img = img_to_array(img)
+        img = np.array(img,dtype=float)
 
         #converting to Black & white
-        x = img.convert('L')
+        # x = img.convert('L')
 
         # img = Image.fromarray(x, 'RGB')
-        img.save('/home/ziad/Documents/image colorization/data_set/y_train/' + str(i) + 'my.png')
+        # img.save('/home/ziad/Documents/image colorization/data_set/y_train/' + str(i) + 'my.png')
 
         # Convert to Numpy Array
-        x = np.asarray(x)
-        y = np.asarray(img)
+        x = rgb2lab(1.0/255*img)[:, :, 0]
+        y = rgb2lab(1.0/255*img)[:, :, 1:]
+        y /= 128
+
+        # x = np.asarray(lab)[:, :, 0]
+        # y = np.asarray(lab)[:, :, 1:]
 
         datasetInput[i, ..., 0] = x
         datasetOutput[i] = y
