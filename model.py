@@ -109,7 +109,7 @@ def run_model():
 
 
 
-    model1.fit(X_train[0:100], y_train[0:100], batch_size=4, epochs=60, shuffle=False)
+    model1.fit(X_train[0:100], y_train[0:100], batch_size=4, epochs=125, shuffle=False)
 
 
 
