@@ -34,24 +34,24 @@ def my_moodel(weights_path=None):
 
     model = Sequential()
     model.add(Convolution2D(8, (3, 3 ),padding='same',strides=(2,2), input_shape=(224, 224, 1)))
-    # model.add(BatchNormalization(axis=-1))
+    model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
 
     model.add(Convolution2D(16, (3, 3), padding='same',strides=(2,2)))
-    # model.add(BatchNormalization(axis=-1))
+    model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
     model.add(Convolution2D(32, (3, 3), padding='same',strides=(2,2)))
-    # model.add(BatchNormalization(axis=-1))
+    model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
     model.add(Convolution2D(64, (3, 3), padding='same',strides=(2,2)))
-    # model.add(BatchNormalization(axis=-1))
+    model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
     model.add(Convolution2D(128, (3, 3), padding='same',strides=(2,2)))
-    # model.add(BatchNormalization(axis=-1))
+    model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
     # model.add(Convolution2D(256, (3, 3), padding='same', strides=(2, 2)))
@@ -59,20 +59,20 @@ def my_moodel(weights_path=None):
     # model.add(Activation('relu'))
 
     model.add(Conv2DTranspose(128, (3, 3), padding='same', strides=(2, 2)))
-    # model.add(BatchNormalization(axis=-1))
+    model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
     model.add(Conv2DTranspose(64, (3, 3), padding='same',strides=(2,2)))
-    # model.add(BatchNormalization(axis=-1))
+    model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
     model.add(Conv2DTranspose(32, (3, 3), padding='same',strides=(2,2)))
-    # model.add(BatchNormalization(axis=-1))
+    model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
 
     model.add(Conv2DTranspose(16, (3, 3), padding='same',strides=(2,2)))
-    # model.add(BatchNormalization(axis=-1))
+    model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
 
@@ -163,7 +163,7 @@ def run_model():
 
 
 
-    history = model1.fit(X_train[0:50], y_train[0:50], batch_size=4, epochs=500, shuffle=False)
+    history = model1.fit(X_train[0:500], y_train[0:500], batch_size=4, epochs=750, shuffle=False)
 
     plot_history(history)
 
@@ -174,12 +174,12 @@ def run_model():
     #print(hist)
     # hist = model.fit(X_train ,y_train ,validation_split=0.2 )
 
-    arr = model1.predict(X_train[0:100], batch_size=8)
+    arr = model1.predict(X_train[0:1000], batch_size=8)
     # print(arr.shape)
     arr *= 128
     # X_train += meanX
 
-    for i in range(100):
+    for i in range(1000):
 
         cur = np.zeros((224, 224, 3))
         Xre = X_train[i].reshape(224, 224)
