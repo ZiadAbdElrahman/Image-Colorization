@@ -66,15 +66,18 @@ def Read_Data() :
         # Convert to Numpy Array
         x = rgb2lab(1.0/255*img)[:, :, 0]
         y = rgb2lab(1.0/255*img)[:, :, 1:]
-        y /= 128
+        # y /= 128
+
+        # x = rgb2lab(img)[:, :, 0]
+        # y = rgb2lab(img)[:, :, 1:]
+
+
 
         # x = np.asarray(lab)[:, :, 0]
         # y = np.asarray(lab)[:, :, 1:]
 
         datasetInput[i, ..., 0] = x
         datasetOutput[i] = y
-        if(i==200) :
-            break
 
         i += 1
         if i % 1000 == 0:
@@ -108,28 +111,11 @@ def get_Data(num_training=3500, num_validation=500, num_test=500 ,norm = True):
     y_test = datasetOutput[TestMask]
 
     # normalizing the image
-    if(norm) :
-        meanX = np.mean(X_train , axis = 0 )
-        meany = np.mean(y_train ,axis=0)
-        X_train -= meanX
-        X_val -= meanX
-        X_test -= meanX
-
-        y_train -= meany
-        y_test -= meany
-        y_val -= meany
 
 
-        return {
-            'X_train': X_train, 'y_train': y_train,
-            'X_val':X_val , 'y_val': y_val,
-            'X_test': X_test, 'y_test': y_test,
-            'meanX': meanX, 'meany': meany
-        }
-    else :
-        return {
-            'X_train': X_train, 'y_train': y_train,
-            'X_val': X_val, 'y_val': y_val,
-            'X_test': X_test, 'y_test': y_test
-        }
+    return {
+        'X_train': X_train, 'y_train': y_train,
+        'X_val': X_val, 'y_val': y_val,
+        'X_test': X_test, 'y_test': y_test
+    }
 

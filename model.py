@@ -16,14 +16,16 @@ from keras.layers.normalization import BatchNormalization
 from keras.activations import relu
 from keras.layers import LocallyConnected2D, LocallyConnected1D
 from keras.applications import VGG16
-from keras.optimizers import SGD ,adam
+from keras.optimizers import SGD, adam
 import numpy as np
 from keras.layers import Activation
 import h5py
 import theano
 from skimage import io, color
-from  scipy.misc import imsave
+from scipy.misc import imsave
 from keras import regularizers
+
+
 # import tensorflow as tf
 # from keras.backend.tensorflow_backend import set_session
 # config = tf.ConfigProto()
@@ -31,26 +33,24 @@ from keras import regularizers
 # set_session(tf.Session(config=config))
 
 def my_moodel(weights_path=None):
-
     model = Sequential()
-    model.add(Convolution2D(8, (3, 3 ),padding='same',strides=(2,2), input_shape=(224, 224, 1)))
+    model.add(Convolution2D(64, (3, 3), padding='same', strides=(2, 2), input_shape=(224, 224, 1)))
     model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
-
-    model.add(Convolution2D(16, (3, 3), padding='same',strides=(2,2)))
+    model.add(Convolution2D(128, (3, 3), padding='same', strides=(2, 2)))
     model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
-    model.add(Convolution2D(32, (3, 3), padding='same',strides=(2,2)))
+    model.add(Convolution2D(256, (3, 3), padding='same', strides=(2, 2)))
     model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
-    model.add(Convolution2D(64, (3, 3), padding='same',strides=(2,2)))
+    model.add(Convolution2D(512, (3, 3), padding='same', strides=(2, 2)))
     model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
-    model.add(Convolution2D(128, (3, 3), padding='same',strides=(2,2)))
+    model.add(Convolution2D(1028, (3, 3), padding='same', strides=(2, 2)))
     model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
@@ -58,28 +58,24 @@ def my_moodel(weights_path=None):
     # # model.add(BatchNormalization(axis=-1))
     # model.add(Activation('relu'))
 
+    model.add(Conv2DTranspose(1028, (3, 3), padding='same', strides=(2, 2)))
+    model.add(BatchNormalization(axis=-1))
+    model.add(Activation('relu'))
+
+    model.add(Conv2DTranspose(512, (3, 3), padding='same', strides=(2, 2)))
+    model.add(BatchNormalization(axis=-1))
+    model.add(Activation('relu'))
+
+    model.add(Conv2DTranspose(256, (3, 3), padding='same', strides=(2, 2)))
+    model.add(BatchNormalization(axis=-1))
+    model.add(Activation('relu'))
+
     model.add(Conv2DTranspose(128, (3, 3), padding='same', strides=(2, 2)))
     model.add(BatchNormalization(axis=-1))
     model.add(Activation('relu'))
 
-    model.add(Conv2DTranspose(64, (3, 3), padding='same',strides=(2,2)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-
-    model.add(Conv2DTranspose(32, (3, 3), padding='same',strides=(2,2)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-
-
-    model.add(Conv2DTranspose(16, (3, 3), padding='same',strides=(2,2)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-
-
-    model.add(Conv2DTranspose(2, (3, 3), padding='same',strides=(2,2)))
+    model.add(Conv2DTranspose(2, (3, 3), padding='same', strides=(2, 2)))
     # model.add(BatchNormalization(axis=-1))
-
-
 
     #
     # model.add(Conv2DTranspose(2, (3, 3), padding='same',strides=(2,2)))
@@ -136,12 +132,11 @@ def plot_history(history):
 
 def run_model():
     # get the data from the file
-    dataset = get_Data(3500 , 0 , 1000,norm=False)
+    dataset = get_Data(4000,600,0,norm=False)
     model1 = my_moodel()
+    model1.reset_states()
     # datasetInput, datasetOutput = Read_Data()
-
-
-
+    #
     X_train = dataset['X_train']
     y_train = dataset['y_train']
     X_val = dataset['X_val']
@@ -153,45 +148,68 @@ def run_model():
     # meanX = dataset['meanX']
     # # print(meany.shape)
 
-
     print (model1.output)
     model1.summary()
     sgd = optimizers.SGD(lr=0.001, decay=1e-3, momentum=0.9, nesterov=True)
-    adam = optimizers.adam(lr=1e-5)
+    adam = optimizers.adam(lr=1e-2)
 
     model1.compile(loss='mean_squared_error', optimizer=adam)
 
-
-
-    history = model1.fit(X_train[0:500], y_train[0:500], batch_size=4, epochs=750, shuffle=False)
+    history = model1.fit(X_train, y_train, batch_size=4, epochs=100 , shuffle=True,validation_data=(X_val,y_val))
 
     plot_history(history)
 
     # model1.predict(X_test)
 
-    #score = model1.evaluate(datasetInput[0:50], datasetOutput[0:50], batch_size=1)
-   # print(score)
-    #print(hist)
+    # score = model1.evaluate(datasetInput[0:50], datasetOutput[0:50], batch_size=1)
+    # print(score)
+    # print(hist)
     # hist = model.fit(X_train ,y_train ,validation_split=0.2 )
 
-    arr = model1.predict(X_train[0:1000], batch_size=8)
+    arrTrain = model1.predict(X_train[0:500], batch_size=4)
+    arrVal = model1.predict(X_val[0:500], batch_size=4)
+    # arrVal = model1.predict(datasetInput[2000:2100], batch_size=4)
+
     # print(arr.shape)
-    arr *= 128
+    # arrTrain *= 128
+    # arrVal *= 128
     # X_train += meanX
 
-    for i in range(1000):
-
+    for i in range(len(arrTrain)):
         cur = np.zeros((224, 224, 3))
         Xre = X_train[i].reshape(224, 224)
         cur[:, :, 0] = Xre
-        cur[:, :, 1:] = arr[i]
+        cur[:, :, 1:] = arrTrain[i]
         end = color.lab2rgb(cur)
         end *= 255
 
-
-        img = Image.fromarray(end.astype(np.uint8),'RGB')
+        img = Image.fromarray(end.astype(np.uint8), 'RGB')
         # imsave('/home/ziad/Documents/image colorization/train/' + str(i) + 'my.png', img)
         img.save('/home/ziad/Documents/image colorization/train/' + str(i) + 'my.png')
+
+    for i in range(len(arrTrain)):
+        cur = np.zeros((224, 224, 3))
+        Xre = X_val[i].reshape(224, 224)
+        cur[:, :, 0] = Xre
+        cur[:, :, 1:] = arrVal[i]
+        end = color.lab2rgb(cur)
+        end *= 255
+
+        img = Image.fromarray(end.astype(np.uint8), 'RGB')
+        # imsave('/home/ziad/Documents/image colorization/train/' + str(i) + 'my.png', img)
+        img.save('/home/ziad/Documents/image colorization/test/' + str(i) + 'my.png')
+
+    # for i in range(100):
+    #     cur = np.zeros((224, 224, 3))
+    #     Xre = datasetInput[2000+i].reshape(224, 224)
+    #     cur[:, :, 0] = Xre
+    #     cur[:, :, 1:] = arrTrain[i]
+    #     end = color.lab2rgb(cur)
+    #     end *= 255
+    #
+    #     img = Image.fromarray(end.astype(np.uint8), 'RGB')
+    #     # imsave('/home/ziad/Documents/image colorization/train/' + str(i) + 'my.png', img)
+    #     img.save('/home/ziad/Documents/image colorization/train/' + str(i+100) + 'my.png')
 
     # for i in range(700 ,1000):
     #     cur = np.zeros((224, 224, 3))
@@ -209,7 +227,8 @@ def run_model():
     #
     #     # end.save('/home/ziad/Documents/image colorization/test/' + str(i) + 'my.png')
 
-    model1.save_weights('/home/ziad/Documents/image colorization/weights.h5')
+    # model1.save_weights('/home/ziad/Documents/image colorization/weights.h5')
+    del model1
 
 
 run_model()
