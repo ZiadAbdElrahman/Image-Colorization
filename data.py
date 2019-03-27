@@ -43,45 +43,37 @@ def Read_Data() :
     # Dimensions
     image_width = 224
     image_height = 224
-    channels = 3
 
+
+    # dataset input is the black and white image, sot it's just one channel "L"
     datasetInput = np.ndarray(shape=(len(images), image_height, image_width, 1),dtype=np.float32)
+
+    # dataset output is other two channel "a and b"
     datasetOutput = np.ndarray(shape=(len(images), image_height, image_width, 2), dtype=np.float32)
 
     # datasetInput = []
     # datasetOutput = []
     i = 0
     for _file in images:
-        img = load_img(folder + "/" + _file)  # this is a PIL image
-        # img.thumbnail((image_width, image_height))
-        img = img_to_array(img)
+        # loading the image and convert it into array
+        img = load_img(folder + "/" + _file)
         img = np.array(img,dtype=float)
 
-        #converting to Black & white
-        # x = img.convert('L')
 
-        # img = Image.fromarray(x, 'RGB')
-        # img.save('/home/ziad/Documents/image colorization/data_set/y_train/' + str(i) + 'my.png')
-
-        # Convert to Numpy Array
-        x = rgb2lab(1.0/255*img)[:, :, 0]
-        y = rgb2lab(1.0/255*img)[:, :, 1:]
-        # y /= 128
-
-        # x = rgb2lab(img)[:, :, 0]
-        # y = rgb2lab(img)[:, :, 1:]
+        # converting int lab image
+        L = rgb2lab(1.0/255*img)[:, :, 0]
+        A_B = rgb2lab(1.0/255*img)[:, :, 1:]
 
 
+        # Normlizing
+        # A_B /= 128
 
-        # x = np.asarray(lab)[:, :, 0]
-        # y = np.asarray(lab)[:, :, 1:]
 
-        datasetInput[i, ..., 0] = x
-        datasetOutput[i] = y
+        datasetInput[i, ..., 0] = L
+        datasetOutput[i] = A_B
 
         i += 1
-        if i % 1000 == 0:
-            print("%d images to array" % i)
+
     print("All images to array!")
 
     return datasetInput, datasetOutput
@@ -89,9 +81,9 @@ def Read_Data() :
 
 def get_Data(num_training=3500, num_validation=500, num_test=500 ,norm = True):
 
-    #spilting the dato into three categry (training, validation, testing) .
+    # Spilting the dato into three categry (training, validation, testing) .
 
-    # read the data from the file and convert it into numpy array
+    # read the data from the file and convert it into array
     datasetInput, datasetOutput = Read_Data()
 
 
@@ -110,12 +102,9 @@ def get_Data(num_training=3500, num_validation=500, num_test=500 ,norm = True):
     X_test = datasetInput[TestMask]
     y_test = datasetOutput[TestMask]
 
-    # normalizing the image
-
 
     return {
         'X_train': X_train, 'y_train': y_train,
         'X_val': X_val, 'y_val': y_val,
         'X_test': X_test, 'y_test': y_test
     }
-
