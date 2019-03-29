@@ -14,10 +14,11 @@ class image(Data) :
 
 
     def __init__(self, width, hight, resizingFolder, mode, DownloadingFolder=None):
-        # Downloading folder the folder will downloading in, the resizing folder the folder  will used to save in after resizing
 
+        # Downloading folder the folder will downloading in, the resizing folder the folder  will used to save in after resizing
         self.DownFolder = DownloadingFolder
         self.ReSizingFolder = resizingFolder
+
 
     # Dowenloding the images from google
     def Dowenloading_Data(self, kewword, NumOfphoto):
@@ -39,6 +40,8 @@ class image(Data) :
             except:
                 faild += 1
         print("sorry, faild to resize " + faild + " image")
+
+
 
     # Load the Dataset from the file data and return it .
     def Read_Data(self):
@@ -84,11 +87,9 @@ class image(Data) :
                     L = rgb2lab(1.0 / 255 * img)[:, :, 0]
 
                     datasetInput[i, ..., 0] = L
-
                 i += 1
             except:
                 faild += 1
-
             if (i % 1000 == 0):
                 print (str(i) + " !!! ")
 
@@ -97,12 +98,12 @@ class image(Data) :
         return datasetInput, datasetOutput
 
 
-    def Save_Image(self, predicted, L, path):
-        for i in range(len(predicted)):
+    def Save_Image(self, A_B, L, path):
+        for i in range(len(A_B)):
             cur = np.zeros((224, 224, 3))
             Xre = L[i].reshape(224, 224)
             cur[:, :, 0] = Xre
-            cur[:, :, 1:] = predicted[i]
+            cur[:, :, 1:] = A_B[i]
             end = color.lab2rgb(cur)
             end *= 255
 
