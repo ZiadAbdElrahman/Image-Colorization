@@ -6,18 +6,18 @@ from keras.preprocessing.image import img_to_array, load_img
 from skimage.color import rgb2lab
 from PIL import Image
 from skimage import color
+from data import Data
 
-class image :
+
+
+class image(Data) :
 
 
     def __init__(self, width, hight, resizingFolder, mode, DownloadingFolder=None):
         # Downloading folder the folder will downloading in, the resizing folder the folder  will used to save in after resizing
 
-        self.width = width
-        self.hight = hight
         self.DownFolder = DownloadingFolder
         self.ReSizingFolder = resizingFolder
-        self.mode = mode
 
     # Dowenloding the images from google
     def Dowenloading_Data(self, kewword, NumOfphoto):
@@ -40,13 +40,13 @@ class image :
                 faild += 1
         print("sorry, faild to resize " + faild + " image")
 
-
+    # Load the Dataset from the file data and return it .
     def Read_Data(self):
 
-        # Load the Dataset from the file data and return it .
 
         folder = self.ReSizingFolder
 
+        # Read all images name from the file
         images = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
         print("Files in train_files: %d" % len(images))
 
@@ -60,9 +60,10 @@ class image :
         # dataset output is other two channel "a and b"
         datasetOutput = np.ndarray(shape=(len(images), image_height, image_width, 2), dtype=np.float32)
 
-        i = 0
-        faild = 0
+        i = 0  # number of image
+        faild = 0 # number of image faild to read it
         for _file in images:
+
             # loading the image and convert it into array
             img = load_img(folder + "/" + _file)
             img = np.array(img, dtype=float)
@@ -92,32 +93,9 @@ class image :
                 print (str(i) + " !!! ")
 
         print("All images to array!")
-        print("sorry, faild to reed " + faild + " image")
+        print("sorry, faild to reed " + str(faild) + " image")
         return datasetInput, datasetOutput
 
-    def get_Data(self, num_training=4000, num_test=1845):
-
-        # Spilting the dato into three categry (training, validation, testing) .
-
-        # read the data from the file and convert it into array
-        datasetInput, datasetOutput = self.Read_Data()
-
-        TrainingMask = list(range(0, num_training))
-        TestMask = list(range(num_training, num_training + num_test))
-
-        X_train = datasetInput[TrainingMask]
-        y_train = datasetOutput[TrainingMask]
-
-        X_test = datasetInput[TestMask]
-        y_test = datasetOutput[TestMask]
-
-        if(self.mode == "predecting") :
-            return datasetInput
-        else :
-            return {
-                'X_train': X_train, 'y_train': y_train,
-                'X_test': X_test, 'y_test': y_test
-            }
 
     def Save_Image(self, predicted, L, path):
         for i in range(len(predicted)):
