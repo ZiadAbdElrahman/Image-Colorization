@@ -1,198 +1,148 @@
 import tensorflow as tf
-import matplotlib.pyplot as plt
-
 config = tf.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.7
 session = tf.Session(config=config)
-from data import get_Data ,Dowenloading_Data
-from PIL import Image
+from image import image
 from keras.models import Sequential
 from keras.layers.convolutional import Convolution2D, Conv2DTranspose
 from keras import optimizers
 from keras.layers.normalization import BatchNormalization
-import numpy as np
 from keras.layers import Activation
-from skimage import color
 from keras.regularizers import l2
+from keras.models import model_from_yaml
+import matplotlib.pyplot as plt
 
-def my_moodel(weights_path=None):
-    model = Sequential()
-    model.add(Convolution2D(32, (5, 5), padding='same', strides=(2, 2), input_shape=(224, 224, 1),activity_regularizer=l2(9e-7)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
+class model :
 
-    model.add(Convolution2D(64, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-
-    model.add(Convolution2D(128, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-
-    model.add(Convolution2D(256, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-
-    model.add(Convolution2D(512, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-
-    # model.add(Convolution2D(256, (3, 3), padding='same', strides=(2, 2)))
-    # # model.add(BatchNormalization(axis=-1))
-    # model.add(Activation('relu'))
-
-    model.add(Conv2DTranspose(512, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-
-    model.add(Conv2DTranspose(256, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-
-    model.add(Conv2DTranspose(128, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
-    model.add(BatchNormalization(axis=-1))
-    model.add(Activation('relu'))
-
-    model.add(Conv2DTranspose(64, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
-    # model.add(BatchNormalization(axis=-1))
-    # model.add(Activation('relu'))
-
-    model.add(Conv2DTranspose(2, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
-    # model.add(BatchNormalization(axis=-1))
-
-    #
-    # model.add(Conv2DTranspose(2, (3, 3), padding='same',strides=(2,2)))
-
-    # model.add(regularizers.l2(1e-3))
-    if weights_path:
-        model.load_weights(weights_path)
-
-    return model
+    def __init__(self, image, pathFormodel= None, pathForwights = None):
+        self.my_model = None
+        self.mode = image.mode
+        self.dataset = image.get_Data()
+        if(self.mode == "training") :
+            self.X_train = self.dataset['X_train']
+            self.y_train = self.dataset['y_train']
+            self.X_test = self.dataset['X_test']
+            self.y_test = self.dataset['y_test']
+        else :
+            self.input = self.dataset
+        # if(not pathFormodel == None):
 
 
-def plot_history(history):
-    loss_list = [s for s in history.history.keys() if 'loss' in s and 'val' not in s]
-    val_loss_list = [s for s in history.history.keys() if 'loss' in s and 'val' in s]
-    acc_list = [s for s in history.history.keys() if 'acc' in s and 'val' not in s]
-    val_acc_list = [s for s in history.history.keys() if 'acc' in s and 'val' in s]
+    def moodel(self):
+        model = Sequential()
+        model.add(Convolution2D(32, (5, 5), padding='same', strides=(2, 2), input_shape=(224, 224, 1),activity_regularizer=l2(9e-7)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
 
-    if len(loss_list) == 0:
-        print('Loss is missing in history')
-        return
+        model.add(Convolution2D(64, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
 
-        ## As loss always exists
-    epochs = range(1, len(history.history[loss_list[0]]) + 1)
+        model.add(Convolution2D(128, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
 
-    ## Loss
-    plt.figure(1)
-    for l in loss_list:
-        plt.plot(epochs, history.history[l], 'b',
-                 label='Training loss (' + str(str(format(history.history[l][-1], '.5f')) + ')'))
-    for l in val_loss_list:
-        plt.plot(epochs, history.history[l], 'g',
-                 label='Validation loss (' + str(str(format(history.history[l][-1], '.5f')) + ')'))
+        model.add(Convolution2D(256, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
 
-    plt.title('Loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-
-    ## Accuracy
-    plt.figure(2)
-    for l in acc_list:
-        plt.plot(epochs, history.history[l], 'b',
-                 label='Training accuracy (' + str(format(history.history[l][-1], '.5f')) + ')')
-    for l in val_acc_list:
-        plt.plot(epochs, history.history[l], 'g',
-                 label='Validation accuracy (' + str(format(history.history[l][-1], '.5f')) + ')')
-
-    plt.title('Accuracy')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.legend()
-    plt.show()
+        model.add(Convolution2D(512, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
 
 
-def run_model():
-    # get the data from the file
-    dataset = get_Data(4000,600,0,norm=False)
-    model1 = my_moodel()
+        model.add(Conv2DTranspose(512, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
 
-    # datasetInput, datasetOutput = Read_Data()
-    #
-    X_train = dataset['X_train']
-    y_train = dataset['y_train']
-    X_val = dataset['X_val']
-    y_val = dataset['y_val']
-    X_test = dataset['X_test']
-    y_test = dataset['y_test']
+        model.add(Conv2DTranspose(256, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
 
+        model.add(Conv2DTranspose(128, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
 
+        model.add(Conv2DTranspose(64, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
 
-    print (model1.output)
-    model1.summary()
-    sgd = optimizers.SGD(lr=0.001, decay=1e-3, momentum=0.9, nesterov=True)
-    adam = optimizers.adam(lr=1e-4)
+        model.add(Conv2DTranspose(2, (5, 5), padding='same', strides=(2, 2),activity_regularizer=l2(1e-7)))
 
-    model1.compile(loss='mean_squared_error', optimizer=adam)
-
-    history = model1.fit(X_train[0:3500], y_train[0:3500], batch_size=16, epochs=25 , shuffle=True,validation_data=(X_val,y_val))
-
-    plot_history(history)
-
-    # model1.predict(X_test)
-
-    # score = model1.evaluate(datasetInput[0:50], datasetOutput[0:50], batch_size=1)
-    # print(score)
-    # print(hist)
-    # hist = model.fit(X_train ,y_train ,validation_split=0.2 )
-
-    arrTrain = model1.predict(X_train[0:500], batch_size=4)
-    arrVal = model1.predict(X_val[0:500], batch_size=4)
-    # arrVal = model1.predict(datasetInput[2000:2100], batch_size=4)
-
-    # print(arr.shape)
-    # arrTrain *= 128
-    # arrVal *= 128
+        return model
 
 
-    for i in range(len(arrTrain)):
-        cur = np.zeros((224, 224, 3))
-        Xre = X_train[i].reshape(224, 224)
-        cur[:, :, 0] = Xre
-        cur[:, :, 1:] = arrTrain[i]
-        end = color.lab2rgb(cur)
-        end *= 255
+    def plot_history(self, history):
+        loss_list = [s for s in history.history.keys() if 'loss' in s and 'val' not in s]
+        val_loss_list = [s for s in history.history.keys() if 'loss' in s and 'val' in s]
+        acc_list = [s for s in history.history.keys() if 'acc' in s and 'val' not in s]
+        val_acc_list = [s for s in history.history.keys() if 'acc' in s and 'val' in s]
 
-        img = Image.fromarray(end.astype(np.uint8), 'RGB')
-        # imsave('/home/ziad/Documents/image colorization/train/' + str(i) + 'my.png', img)
-        img.save('/home/ziad/Documents/image colorization/train/' + str(i) + 'my.png')
+        if len(loss_list) == 0:
+            print('Loss is missing in history')
+            return
 
-    for i in range(len(arrTrain)):
-        cur = np.zeros((224, 224, 3))
-        Xre = X_val[i].reshape(224, 224)
-        cur[:, :, 0] = Xre
-        cur[:, :, 1:] = arrVal[i]
-        end = color.lab2rgb(cur)
-        end *= 255
+            ## As loss always exists
+        epochs = range(1, len(history.history[loss_list[0]]) + 1)
 
-        img = Image.fromarray(end.astype(np.uint8), 'RGB')
-        # imsave('/home/ziad/Documents/image colorization/train/' + str(i) + 'my.png', img)
-        img.save('/home/ziad/Documents/image colorization/test/' + str(i) + 'my.png')
+        ## Loss
+        plt.figure(1)
+        for l in loss_list:
+            plt.plot(epochs, history.history[l], 'b',
+                     label='Training loss (' + str(str(format(history.history[l][-1], '.5f')) + ')'))
+        for l in val_loss_list:
+            plt.plot(epochs, history.history[l], 'g',
+                     label='Validation loss (' + str(str(format(history.history[l][-1], '.5f')) + ')'))
+
+        plt.title('Loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+
+        ## Accuracy
+        plt.figure(2)
+        for l in acc_list:
+            plt.plot(epochs, history.history[l], 'b',
+                     label='Training accuracy (' + str(format(history.history[l][-1], '.5f')) + ')')
+        for l in val_acc_list:
+            plt.plot(epochs, history.history[l], 'g',
+                     label='Validation accuracy (' + str(format(history.history[l][-1], '.5f')) + ')')
+
+        plt.title('Accuracy')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.legend()
+        plt.show()
 
 
-    model1.save_weights('/home/ziad/Documents/image colorization/weights.h5')
+    def train(self):
+
+        self.my_model = self.moodel()
+
+        self.my_model.summary()
+
+        self.adam = optimizers.adam(lr=6e-5)
+        self.my_model.compile(loss='mean_squared_error', optimizer=self.adam)
+
+        history = self.my_model.fit(self.X_train, self.y_train, batch_size=16, epochs=35 , shuffle=True,validation_data=(self.X_test,self.y_test))
+
+
+        self.plot_history(history)
 
 
 
-# run_model()
+        self.my_model.save_weights('weights.h5')
+        model_yaml = self.my_model.to_yaml()
+        with open("model.yaml", "w") as yaml_file:
+            yaml_file.write(model_yaml)
 
-Dowenloading_Data("dogs",2000)
-Dowenloading_Data("cats",2000)
-Dowenloading_Data("Mountains",2000)
-Dowenloading_Data("beach",1000)
-Dowenloading_Data("Park",2000)
-Dowenloading_Data("Nature",2000)
-Dowenloading_Data("town",2000)
-Dowenloading_Data("houses",2000)
-Dowenloading_Data("street",2000)
+
+    def predict(self,Savepath):
+        if(self.mode == "training") :
+            predicted = self.my_model.predict(self.X_test,batch_size=16)
+            image.Save_Image(predicted , self.X_test, Savepath)
+        else:
+            predicted = self.my_model.predict(self.input, batch_size=16)
+            image.Save_Image(predicted, self.input, Savepath)
+
+
+
+
