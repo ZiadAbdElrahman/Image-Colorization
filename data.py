@@ -20,11 +20,16 @@ class Data :
         datasetInput, datasetOutput = self.Read_Data()
 
 
-        TrainingMask = list(range(int(len(datasetInput)*0.7)))
-        TestMask = list(range(int(len(datasetInput)*0.3)))
 
+        TrainingMask = list(range(0, int(len(datasetInput)*0.8)))
+        TestMask = list(range(len(TrainingMask), int(len(datasetInput))))
 
-
+        # print(len(TrainingMask))
+        # print (max(TrainingMask))
+        # print (min(TrainingMask))
+        # print(len(TestMask))
+        # print (max(TestMask))
+        # print (min(TestMask))
         X_train = datasetInput[TrainingMask]
         y_train = datasetOutput[TrainingMask]
 

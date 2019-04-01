@@ -18,7 +18,9 @@ class image(Data) :
         # Downloading folder the folder will downloading in, the resizing folder the folder  will used to save in after resizing
         self.DownFolder = DownloadingFolder
         self.ReSizingFolder = resizingFolder
-
+        Data.mode = mode
+        Data.width = width
+        Data.hight = hight
 
     # Dowenloding the images from google
     def Dowenloading_Data(self, kewword, NumOfphoto):
@@ -34,12 +36,12 @@ class image(Data) :
             try:
                 with open(input_path, 'r+b') as f:
                     with Image.open(f) as image:
-                        cover = resizeimage.resize_cover(image, [self.width, self.hight])
-                        newName = self.ReSizingFolder + "/" + str(ind)  + '.jpg'
+                        cover = resizeimage.resize_cover(image, [Data.width, Data.hight])
+                        newName = self.ReSizingFolder + "/" + str(ind) + "hi" + '.jpg'
                         cover.save(newName, image.format)
             except:
                 faild += 1
-        print("sorry, faild to resize " + faild + " image")
+        print("sorry, faild to resize " + str(faild) + " image")
 
 
 

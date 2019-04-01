@@ -5,6 +5,7 @@ session = tf.Session(config=config)
 from keras.models import model_from_yaml
 import matplotlib.pyplot as plt
 from image import image
+import numpy as np
 from keras.models import Sequential
 from keras.layers.convolutional import Convolution2D, Conv2DTranspose
 from keras import optimizers
@@ -15,8 +16,8 @@ from keras.regularizers import l2
 class model :
 
     def __init__(self, image, pathFormodel= None, pathForwights = None):
-
-        self.my_model = None
+        self.image = image
+        self.my_model = self.moodel()
         self.mode = image.mode
         self.dataset = image.get_Data()
         if(self.mode == "training") :
@@ -29,8 +30,9 @@ class model :
         # if(not pathFormodel == None):
 
 
+
     def moodel(self):
-        reg = 9e-7
+        reg = 2e-7
         model = Sequential()
 
         model.add(Convolution2D(32, (5, 5), padding='same', strides=(2, 2), input_shape=(224, 224, 1),activity_regularizer=l2(reg)))
@@ -102,10 +104,15 @@ class model :
 
         if(self.mode == "training") :
             predicted = self.my_model.predict(self.X_test,batch_size=16)
-            image.Save_Image(predicted , self.X_test, SavePath)
+            # cur = np.zeros(((len(self.X_test), 224, 224, 2)))
+            # self.image.Save_Image(cur,self.X_test,"test/")
+            self.image.Save_Image(predicted , self.X_test, SavePath)
         else:
             predicted = self.my_model.predict(self.input, batch_size=16)
-            image.Save_Image(predicted, self.input, SavePath)
+            cur = np.zeros(((len(self.input), 224, 224, 2)))
+            # # cur = np.zeros((224, 224, 2))
+            # self.image.Save_Image(cur, self.input, "test/")
+            self.image.Save_Image(predicted, self.input, SavePath)
 
 
 
