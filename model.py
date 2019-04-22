@@ -15,27 +15,33 @@ from keras.regularizers import l2
 
 class model :
 
-    def __init__(self, image, pathFormodel= None, pathForwights = None):
+    def __init__(self, mode, image=None, pathFormodel= None, pathForwights = None):
         self.image = image
         self.my_model = self.moodel()
-        self.mode = image.mode
-        self.dataset = image.get_Data()
-        if(self.mode == "training") :
-            self.X_train = self.dataset['X_train']
-            self.y_train = self.dataset['y_train']
-            self.X_test = self.dataset['X_test']
-            self.y_test = self.dataset['y_test']
-        else :
-            self.input = self.dataset
-        # if(not pathFormodel == None):
+        self.mode = mode
+        # self.dataset = image.get_Data()
+        #
+        #
+        # if(self.mode == "training") :
+        #     self.X_train = self.dataset['X_train']
+        #     self.y_train = self.dataset['y_train']
+        #     self.X_test = self.dataset['X_test']
+        #     self.y_test = self.dataset['y_test']
+        # else :
+        #     self.input = self.dataset
+        #
+        self.X_train, self.y_train, self.X_test, self.y_test = image.CIFAIR()
+
+        # # if(not pathFormodel == None):
 
 
 
     def moodel(self):
-        reg = 2e-7
+        reg = 5e-7
         model = Sequential()
 
-        model.add(Convolution2D(32, (5, 5), padding='same', strides=(2, 2), input_shape=(224, 224, 1),activity_regularizer=l2(reg)))
+        model.add(Convolution2D(32, (5, 5), padding='same', strides=(2, 2), input_shape=(224, 224, 1),
+                                activity_regularizer=l2(reg)))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
@@ -75,7 +81,7 @@ class model :
         return model
 
 
-    def train(self,batch_size=16, epochs=35, learning_rate=6e-5):
+    def train(self,batch_size=4, epochs=30, learning_rate=1e-4):
 
         self.my_model = self.moodel()
         self.my_model.summary()
@@ -105,7 +111,7 @@ class model :
         if(self.mode == "training") :
             predicted = self.my_model.predict(self.X_test,batch_size=16)
             # cur = np.zeros(((len(self.X_test), 224, 224, 2)))
-            # self.image.Save_Image(cur,self.X_test,"test/")
+            # self.image.Save_Image(cur,self.X_test,"testB&W/")
             self.image.Save_Image(predicted , self.X_test, SavePath)
         else:
             predicted = self.my_model.predict(self.input, batch_size=16)

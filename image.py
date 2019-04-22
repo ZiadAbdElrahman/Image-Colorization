@@ -8,7 +8,7 @@ from PIL import Image
 from skimage import color
 from data import Data
 
-
+from data_utils import load_CIFAR10
 
 class image(Data) :
 
@@ -23,10 +23,17 @@ class image(Data) :
         Data.hight = hight
 
     # Dowenloding the images from google
-    def Dowenloading_Data(self, kewword, NumOfphoto):
-        response = google_images_download.googleimagesdownload()
-        absolute_image_paths = response.download({"keywords": kewword,"output_directory": self.DownFolder, "limit": NumOfphoto, "color_type": "full-color",
-                                                  "chromedriver": "/home/ziad/Downloads/chromedriver"})
+    def Dowenloading_Data(self, kewword, NumOfphoto,url = None):
+        if(not url == None) :
+            response = google_images_download.googleimagesdownload()
+            absolute_image_paths = response.download({"keywords": kewword,"output_directory": self.DownFolder, "limit": NumOfphoto, "color_type": "full-color",
+                                                      "chromedriver": "/home/ziad/Downloads/chromedriver"})
+        else :
+            response = google_images_download.googleimagesdownload()
+            absolute_image_paths = response.download(
+                {"single_image": url, "output_directory": self.DownFolder, "limit": NumOfphoto,
+                 "color_type": "full-color",
+                 "chromedriver": "/home/ziad/Downloads/chromedriver"})
 
     # converting all image to the same size
     def resizing(self):
@@ -37,7 +44,7 @@ class image(Data) :
                 with open(input_path, 'r+b') as f:
                     with Image.open(f) as image:
                         cover = resizeimage.resize_cover(image, [Data.width, Data.hight])
-                        newName = self.ReSizingFolder + "/" + str(ind) + "hi" + '.jpg'
+                        newName = self.ReSizingFolder + "/" + str(ind) + "cat" + '.jpg'
                         cover.save(newName, image.format)
             except:
                 faild += 1
@@ -96,7 +103,8 @@ class image(Data) :
                 print (str(i) + " !!! ")
 
         print("All images to array!")
-        print("sorry, faild to reed " + str(faild) + " image")
+        if(faild>0) :
+            print("sorry,faild to reed " + str(faild) + " image")
         return datasetInput, datasetOutput
 
 
@@ -111,3 +119,41 @@ class image(Data) :
 
             img = Image.fromarray(end.astype(np.uint8), 'RGB')
             img.save(path + str(i) + '.png')
+
+    def CIFAIR(self):
+        cifar10_dir = '/home/ziad/Documents/image colorization/cifar-10-batches-py'
+        dataTRAIN, _, dataTEST, _ = load_CIFAR10(cifar10_dir)
+
+        numOFtrain = len(dataTRAIN)
+        y_train = np.ndarray(shape=(numOFtrain, 32, 32, 2),dtype=np.float32)
+        X_train = np.ndarray(shape=(numOFtrain, 32, 32, 1),dtype=np.float32)
+        for i in range(numOFtrain):
+            # print ("hi")
+            img = np.array(dataTRAIN[i], dtype=float)
+            L = rgb2lab(1.0 / 255 * img)[:, :, 0]
+            A_B = rgb2lab(1.0 / 255 * img)[:, :, 1:]
+
+            # Normlizing
+            # A_B /= 128
+
+            X_train[i, ..., 0] = L
+            y_train[i] = A_B
+            if(i%1000 == 0):
+                print (i)
+
+        numOFtest = len(dataTEST)
+        y_test = np.ndarray(shape=(numOFtest, 32, 32, 2), dtype=np.float32)
+        X_test = np.ndarray(shape=(numOFtest, 32, 32, 1), dtype=np.float32)
+
+        for i in range(numOFtest):
+            img = np.array(dataTEST[i], dtype=float)
+            L = rgb2lab(1.0 / 255 * img)[:, :, 0]
+            A_B = rgb2lab(1.0 / 255 * img)[:, :, 1:]
+
+            # Normlizing
+            # A_B /= 128
+
+            X_test[i, ..., 0] = L
+            y_test[i] = A_B
+
+        return X_train, y_train , X_test, y_test
