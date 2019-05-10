@@ -19,12 +19,12 @@ from keras.regularizers import l2
 # from livelossplot.keras import PlotLossesCallback
 class model :
 
-    def __init__(self, mode, image=None, pathFormodel= None, pathForwights = None):
+    def __init__(self, mode, image=None, arrayName=None, pathFormodel= None, pathForwights = None):
         self.image = image
         self.my_model = self.moodel()
         # self.my_model.load_weights("weights.h5")
         self.mode = mode
-        self.dataset = image.get_Data()
+        self.dataset = image.get_Data(arrayName)
         self.adam = None
 
 
@@ -44,50 +44,62 @@ class model :
 
     def moodel(self):
 
-        reg = 1e-7
-        reg = 1e-10
+        # reg = 1e-6
+        reg = 8e-10
+        # reg = 0
         model = Sequential()
 
-        model.add(Convolution2D(16, (10, 10), padding='same', strides=(4, 4), input_shape=(224, 224, 1),
+        model.add(Convolution2D(16, (4, 4), padding='same', strides=(2, 2), input_shape=(224, 224, 1),
                                 activity_regularizer=l2(reg)))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-        model.add(Convolution2D(32, (10, 10), padding='same', strides=(4, 4), activity_regularizer=l2(reg)))
+        model.add(Convolution2D(32, (4, 4), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-        model.add(Convolution2D(64, (10, 10), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
-        model.add(BatchNormalization(axis=-1))
-        model.add(Activation('relu'))
-
-
-
-
-        model.add(Convolution2D(128, (10, 10), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
-        model.add(BatchNormalization(axis=-1))
-        model.add(Activation('relu'))
-
-        model.add(Convolution2D(128, (10, 10), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(Convolution2D(64, (4, 4), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
 
 
-        model.add(Conv2DTranspose(128, (10, 10), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+
+        model.add(Convolution2D(128, (4, 4), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-        model.add(Conv2DTranspose(128, (10, 10), padding='same', strides=(4, 4), activity_regularizer=l2(reg)))
+        model.add(Convolution2D(128, (4, 4), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
+
+        model.add(Convolution2D(128, (4, 4), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
+
+        model.add(Convolution2D(128, (4, 4), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
 
-        model.add(Conv2DTranspose(64, (10, 10), padding='same', strides=(4, 4), activity_regularizer=l2(reg)))
+
+
+        model.add(Conv2DTranspose(128, (4, 4), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-        model.add(Conv2DTranspose(2, (10, 10), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(Conv2DTranspose(128, (4, 4), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
+
+
+        model.add(Conv2DTranspose(64, (4, 4), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(BatchNormalization(axis=-1))
+        model.add(Activation('relu'))
+
+
+
+        model.add(Conv2DTranspose(2, (4, 4), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
 
 
         return model
