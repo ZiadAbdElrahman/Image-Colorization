@@ -1,116 +1,123 @@
 import tensorflow as tf
+
 config = tf.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = 0.8
 session = tf.Session(config=config)
-from keras.models import model_from_yaml
+
 import matplotlib.pyplot as plt
-from image import image
 import numpy as np
-from keras.models import Sequential
+from keras.models import Sequential, model_from_yaml
 from keras.layers.convolutional import Convolution2D, Conv2DTranspose
 from keras import optimizers
 from keras.layers.normalization import BatchNormalization
-from keras.layers import Activation
+from keras.layers import Activation, Dropout
 from keras.regularizers import l2
-#
-# from tensorflow.keras.callbacks import TensorBoard
-# # from tensorflow.python.keras.callbacks import TensorBoard
-# from time import timeclas
-# from livelossplot.keras import PlotLossesCallback
-class model :
+from keras.utils import plot_model
 
-    def __init__(self, mode, image=None, arrayName=None, pathFormodel= None, pathForwights = None):
+
+class model:
+
+    def __init__(self, image=None, arrayName=None, pathForModel=None, pathForwights=None):
+
         self.image = image
-        self.my_model = self.moodel()
-        # self.my_model.load_weights("weights.h5")
-        self.mode = mode
         self.dataset = image.get_Data(arrayName)
+
+        self.mode = image.mode
+
         self.adam = None
 
+        if pathForModel != None:
+            yaml_file = open(pathForModel, 'r')
+            loaded_model_yaml = yaml_file.read()
+            yaml_file.close()
+            self.my_model = model_from_yaml(loaded_model_yaml)
+            self.my_model.summary()
+        else:
+            self.my_model = self.moodel()
 
-        if(self.mode == "training") :
+        if pathForwights != None:
+            self.my_model.load_weights(pathForwights)
+
+        # plot_model(self.my_model, to_file='model.png')
+
+        if (self.mode == "training"):
             self.X_train = self.dataset['X_train']
             self.y_train = self.dataset['y_train']
             self.X_test = self.dataset['X_test']
             self.y_test = self.dataset['y_test']
-        else :
+        else:
             self.input = self.dataset
-
-        # self.X_train, self.y_train, self.X_test, self.y_test = image.CIFAIR()
-
-        # # if(not pathFormodel == None):
-
-
 
     def moodel(self):
 
         # reg = 1e-6
-        reg = 8e-10
-        # reg = 0
+        # reg = 1e-8
+        # reg = 8e-10
+        reg = 0
+
+        drp = 0
+
         model = Sequential()
 
-        model.add(Convolution2D(16, (4, 4), padding='same', strides=(2, 2), input_shape=(224, 224, 1),
+        model.add(Convolution2D(32, (3, 3), padding='same', strides=(2, 2), input_shape=(224, 224, 1),
                                 activity_regularizer=l2(reg)))
+        model.add(Dropout(drp))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-        model.add(Convolution2D(32, (4, 4), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(Convolution2D(32, (3, 3), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(Dropout(drp))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-        model.add(Convolution2D(64, (4, 4), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(Convolution2D(32, (3, 3), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(Dropout(drp))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-
-
-
-        model.add(Convolution2D(128, (4, 4), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(Convolution2D(64, (3, 3), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(Dropout(drp))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-        model.add(Convolution2D(128, (4, 4), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(Convolution2D(64, (3, 3), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(Dropout(drp))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-        model.add(Convolution2D(128, (4, 4), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(Convolution2D(64, (3, 3), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(Dropout(drp))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-        model.add(Convolution2D(128, (4, 4), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(Convolution2D(64, (3, 3), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
+        model.add(Dropout(drp))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-
-
-
-        model.add(Conv2DTranspose(128, (4, 4), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(Conv2DTranspose(32, (3, 3), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(Dropout(drp))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-        model.add(Conv2DTranspose(128, (4, 4), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(Conv2DTranspose(32, (3, 3), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(Dropout(drp))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-
-        model.add(Conv2DTranspose(64, (4, 4), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(Conv2DTranspose(32, (3, 3), padding='same', strides=(2, 2), activity_regularizer=l2(reg)))
+        model.add(Dropout(drp))
         model.add(BatchNormalization(axis=-1))
         model.add(Activation('relu'))
 
-
-
-        model.add(Conv2DTranspose(2, (4, 4), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
-
+        model.add(Conv2DTranspose(2, (3, 3), padding='same', strides=(1, 1), activity_regularizer=l2(reg)))
 
         return model
 
+    def train(self, batch_size=4, epochs=30, learning_rate=1e-4):
 
-    def train(self,batch_size=4, epochs=30, learning_rate=1e-4):
-
+        # print the
         self.my_model.summary()
-
-        # name = "color{}".format(int(time()))
-        # tenserboard = TensorBoard(log_dir='logs/{}'.format(name))
 
         # lr = 6e-5)
         self.adam = optimizers.adam(lr=learning_rate)
@@ -118,7 +125,6 @@ class model :
 
         history = self.my_model.fit(self.X_train, self.y_train, batch_size=batch_size, epochs=epochs, shuffle=True,
                                     validation_data=(self.X_test, self.y_test))
-
 
         self.plot_history(history)
 
@@ -128,28 +134,12 @@ class model :
         with open("model.yaml", "w") as yaml_file:
             yaml_file.write(model_yaml)
 
-
-    def predict(self,SavePath):
+    def predict(self, X, SavePath):
         # path to save the predicted image in
 
-        if(self.mode == "training") :
-            predictedTEST = self.my_model.predict(self.X_test,batch_size=16)
-            predictedTRIAN = self.my_model.predict(self.X_train, batch_size=16)
+        predicted = self.my_model.predict(X, batch_size=16)
 
-            # cur = np.zeros(((len(self.X_test), 224, 224, 2)))
-            # self.image.Save_Image(cur,self.X_test,"testB&W/")
-            self.image.Save_Image(predictedTEST, self.X_test, SavePath)
-            self.image.Save_Image(predictedTRIAN, self.X_train, "train/")
-
-        else:
-            predicted = self.my_model.predict(self.input, batch_size=16)
-            cur = np.zeros(((len(self.input), 224, 224, 2)))
-            # # cur = np.zeros((224, 224, 2))
-            # self.image.Save_Image(cur, self.input, "test/")
-            self.image.Save_Image(predicted, self.input, SavePath)
-
-
-
+        self.image.Save_Image(predicted, X, SavePath)
 
     def plot_history(self, history):
         loss_list = [s for s in history.history.keys() if 'loss' in s and 'val' not in s]
@@ -177,6 +167,3 @@ class model :
         plt.legend()
         plt.savefig("LOSS")
         plt.show()
-
-
-
